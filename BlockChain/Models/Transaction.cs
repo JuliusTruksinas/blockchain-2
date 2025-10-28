@@ -4,7 +4,7 @@ namespace BlockChain.Models;
 
 public class Transaction
 {
-    public string TransactionId { get; private set; }
+    public string Id { get; private set; }
     public string Sender { get; set; }
     public string Receiver { get; set; }
     public decimal Amount { get; set; }
@@ -14,11 +14,11 @@ public class Transaction
         Sender = sender;
         Receiver = receiver;
         Amount = amount;
-        TransactionId = hasher.Hash($"{sender}{receiver}{amount}{Guid.NewGuid()}");
+        Id = hasher.Hash($"{sender}{receiver}{amount}{Guid.NewGuid()}");
     }
 
     public override string ToString()
     {
-        return $"{TransactionId[..8]}... | {Sender[..6]} -> {Receiver[..6]} | {Amount}";
+        return $"{Id[..8]}... | {Sender[..6]} -> {Receiver[..6]} | {Amount}";
     }
 }

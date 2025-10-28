@@ -6,16 +6,20 @@ public class Block
 {
     public BlockHeader Header { get; private set; }
     public List<Transaction> Transactions { get; private set; }
-    public string BlockHash { get; private set; }
+    public string Hash { get; private set; }
 
-    public Block(List<Transaction> transactions, string previousHash, int difficulty, IHasher hasher)
+    public Block(
+        List<Transaction> transactions,
+        string previousHash,
+        int difficulty,
+        IHasher hasher)
     {
         Transactions = transactions;
-        string txConcat = string.Join("", transactions.Select(t => t.TransactionId));
-        string txHash = hasher.Hash(txConcat);
+        string concatedTransactionIds = string.Join("", transactions.Select(t => t.TransactionId));
+        string txHash = hasher.Hash(concatedTransactionIds);
 
         Header = new BlockHeader(previousHash, txHash, difficulty);
-        BlockHash = MineBlock(hasher);
+        Hash = MineBlock(hasher);
     }
 
     private string MineBlock(IHasher hasher)
@@ -36,6 +40,6 @@ public class Block
 
     public override string ToString()
     {
-        return $"BlockHash: {BlockHash[..10]}..., Prev: {Header.PreviousHash[..10]}..., TxCount: {Transactions.Count}, Nonce: {Header.Nonce}";
+        return $"Block hash: {Hash[..10]}..., Prev: {Header.PreviousHash[..10]}..., Transaction count: {Transactions.Count}, Nonce: {Header.Nonce}";
     }
 }
