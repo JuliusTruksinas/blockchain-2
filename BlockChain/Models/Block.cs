@@ -15,7 +15,7 @@ public class Block
         IHasher hasher)
     {
         Transactions = transactions;
-        string concatedTransactionIds = string.Join("", transactions.Select(t => t.TransactionId));
+        string concatedTransactionIds = string.Join("", transactions.Select(t => t.Id));
         string txHash = hasher.Hash(concatedTransactionIds);
 
         Header = new BlockHeader(previousHash, txHash, difficulty);
