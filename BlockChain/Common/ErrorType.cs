@@ -6,5 +6,7 @@ public enum ErrorType
     InvalidArguments,
     FileNotFound,
     XsltError,
+    XmlGenerationFailed,
+    FileWriteError,
     UnexpectedError
 }
