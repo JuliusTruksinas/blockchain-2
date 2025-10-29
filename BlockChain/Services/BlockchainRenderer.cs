@@ -15,7 +15,7 @@ public class BlockchainRenderer
         _xsltTemplatePath = xsltTemplatePath;
     }
 
-    public Result GenerateHtml()
+    public Result<string> RenderHtml()
     {
         var xmlResult = GenerateXmlFromBlockchain();
         if (!xmlResult.IsSuccess)
@@ -29,7 +29,7 @@ public class BlockchainRenderer
         if (!writeResult.IsSuccess)
             return writeResult.Error;
 
-        return Result.Success();
+        return writeResult.Value;
     }
 
     private Result<string> GenerateXmlFromBlockchain()
@@ -44,14 +44,15 @@ public class BlockchainRenderer
         return xml;
     }
 
-    private Result WriteToFile(string html)
+    private Result<string> WriteToFile(string html)
     {
         var outputPath = Path.Combine(Directory.GetCurrentDirectory(), "Output", "blockchain.html");
         try
         {
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
             File.WriteAllText(outputPath, html);
-            return Result.Success();
+
+            return outputPath;
         }
         catch (Exception ex)
         {

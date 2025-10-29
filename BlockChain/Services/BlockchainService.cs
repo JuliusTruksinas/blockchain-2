@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using BlockChain.Hashers;
 using BlockChain.Models;
 
@@ -37,6 +38,19 @@ public class BlockchainService
 
         Console.WriteLine("All transactions processed!");
         Console.WriteLine($"Total Blocks in Chain: {_blockchain.Chain.Count}");
+
+        string xsltTemplatePath = Path.Combine(Directory.GetCurrentDirectory(), "Templates", "blockchain.xslt");
+        var renderer = new BlockchainRenderer(_blockchain, xsltTemplatePath);
+
+        var renderResult = renderer.RenderHtml();
+        if (!renderResult.IsSuccess)
+        {
+            Console.WriteLine($"Rendering of the blockchain failed: {renderResult.Error}");
+            return;
+        }
+
+        Console.WriteLine($"Rendered blockchain: {renderResult.Value}");
+        OpenFileInBrowser(renderResult.Value);
     }
 
     private void UpdateBalances(List<User> users, List<Transaction> transactions)
@@ -51,6 +65,18 @@ public class BlockchainService
                 sender.Balance -= transaction.Amount;
                 receiver.Balance += transaction.Amount;
             }
+        }
+    }
+
+    private void OpenFileInBrowser(string filePath)
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo(filePath) { UseShellExecute = true });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error opening the file: {ex.Message}");
         }
     }
 }
