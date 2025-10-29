@@ -1,9 +1,15 @@
-﻿namespace BlockChain;
+﻿using BlockChain.Hashers;
+using BlockChain.Services;
+
+namespace BlockChain;
 
 class Program
 {
     static void Main(string[] args)
     {
-        Console.WriteLine("Hello, World!");
+        var hasher = new CustomHasher();
+        var blockchainService = new BlockchainService(hasher);
+
+        blockchainService.Run();
     }
 }
