@@ -47,3 +47,23 @@ public class Result<T>
         return Result<T>.Failure(errorType);
     }
 }
+
+public class Result
+{
+    public bool IsSuccess { get; private set; }
+    public ErrorType Error { get; private set; }
+
+    private Result(bool isSuccess, ErrorType errorType)
+    {
+        IsSuccess = isSuccess;
+        Error = errorType;
+    }
+
+    public static Result Success()
+        => new(isSuccess: true, ErrorType.None);
+    public static Result Failure(ErrorType errorType)
+        => new(isSuccess: false, errorType);
+
+    public static implicit operator Result(ErrorType errorType)
+        => Failure(errorType);
+}
