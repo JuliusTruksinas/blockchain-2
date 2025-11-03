@@ -86,5 +86,4 @@ You can modify these settings in `BlockchainService.cs` or add custom configurat
 
 * Console logs show a summary of each block during mining.
 * A detailed view of each block’s transactions is available in the generated `blockchain.html` file.
-
 ---
