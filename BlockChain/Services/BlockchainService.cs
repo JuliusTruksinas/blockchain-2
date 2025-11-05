@@ -62,11 +62,11 @@ public class BlockchainService
         RenderBlockchainToHtml();
     }
 
-    private static void RemoveMinedTransactions(List<Transaction> transactions, List<Transaction> selectedTransactions)
+    private void RemoveTransactionsFromPool(List<Transaction> selectedTransactions, List<Transaction> allTransactions)
     {
-        foreach (var transaction in selectedTransactions)
+        foreach (var tx in selectedTransactions)
         {
-            transactions.Remove(transaction);
+            allTransactions.RemoveAll(t => t.Id == tx.Id);
         }
     }
 
