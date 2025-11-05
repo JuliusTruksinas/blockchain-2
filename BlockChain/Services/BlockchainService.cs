@@ -32,30 +32,23 @@ public class BlockchainService
             // Create and mine candidate blocks
             var minedBlock = MineBlock(selectedTransactions);
 
-            transactions.RemoveRange(0, Math.Min(100, transactions.Count));
-
-            var block = new Block(selectedTransactions, _blockchain.GetLatestHash(), 3, _hasher);
-            _blockchain.AddBlock(block);
-
-            UpdateBalances(users, selectedTransactions);
-            Console.WriteLine($"Block #{blockCount} mined! Hash: {block.Hash[..10]}...");
+            // If a block is mined, add it to the blockchain
+            if (minedBlock != null)
+            {
+                _blockchain.AddBlock(minedBlock);
+                UpdateBalances(users, selectedTransactions);
+                Console.WriteLine($"Block #{blockCount} mined! Hash: {minedBlock.Hash[..10]}...");
+            }
+            else
+            {
+                Console.WriteLine($"No block mined after 5 attempts. Retrying...");
+            }
         }
 
         Console.WriteLine("All transactions processed!");
         Console.WriteLine($"Total Blocks in Chain: {_blockchain.Chain.Count}");
 
-        string xsltTemplatePath = Path.Combine(Directory.GetCurrentDirectory(), "Templates", "blockchain.xslt");
-        var renderer = new BlockchainRenderer(_blockchain, xsltTemplatePath);
-
-        var renderResult = renderer.RenderHtml();
-        if (!renderResult.IsSuccess)
-        {
-            Console.WriteLine($"Rendering of the blockchain failed: {renderResult.Error}");
-            return;
-        }
-
-        Console.WriteLine($"Rendered blockchain: {renderResult.Value}");
-        OpenFileInBrowser(renderResult.Value);
+        RenderBlockchainToHtml();
     }
 
     private List<Transaction> GetNextTransactions(ref List<Transaction> transactions)
@@ -110,6 +103,21 @@ public class BlockchainService
                 Console.WriteLine($"Transaction failed: {transaction.Id} | Insufficient funds or invalid user.");
             }
         }
+    }
+    private void RenderBlockchainToHtml()
+    {
+        string xsltTemplatePath = Path.Combine(Directory.GetCurrentDirectory(), "Templates", "blockchain.xslt");
+        var renderer = new BlockchainRenderer(_blockchain, xsltTemplatePath);
+        var renderResult = renderer.RenderHtml();
+
+        if (!renderResult.IsSuccess)
+        {
+            Console.WriteLine($"Rendering of the blockchain failed: {renderResult.Error}");
+            return;
+        }
+
+        Console.WriteLine($"Rendered blockchain: {renderResult.Value}");
+        OpenFileInBrowser(renderResult.Value);
     }
 
     private void OpenFileInBrowser(string filePath)
