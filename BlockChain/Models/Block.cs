@@ -6,7 +6,7 @@ public class Block
 {
     public BlockHeader Header { get; private set; }
     public List<Transaction> Transactions { get; private set; }
-    public string Hash { get; private set; }
+    public string Hash { get; private set; } // Will be set when mined
 
     public Block(
         List<Transaction> transactions,
@@ -21,23 +21,32 @@ public class Block
         string transactionsMerkleRoot = merkleTree.GenerateMerkleRoot(transactionHashes);
 
         Header = new BlockHeader(previousHash, transactionsMerkleRoot, difficulty);
-        Hash = MineBlock(hasher);
+        Hash = string.Empty;
     }
 
-    private string MineBlock(IHasher hasher)
+    public bool TryMineBlock(IHasher hasher, int maxAttempts)
     {
-        string hash;
         string prefix = new string('0', Header.Difficulty);
         int nonce = 0;
+        string hash;
 
-        do
+        // Perform the mining process (Proof of Work)
+        for (int attempt = 0; attempt < maxAttempts; attempt++)
         {
             Header.Nonce = nonce++;
             string input = $"{Header.PreviousHash}{Header.Timestamp}{Header.Version}{Header.TransactionsHash}{Header.Nonce}";
             hash = hasher.Hash(input);
-        } while (!hash.StartsWith(prefix));
 
-        return hash;
+            if (hash.StartsWith(prefix))
+            {
+                // If a valid hash is found, set it and return true
+                Hash = hash;
+                return true;
+            }
+        }
+
+        // If no valid hash is found within the maxAttempts, return false
+        return false;
     }
 
     public override string ToString()
