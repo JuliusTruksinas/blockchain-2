@@ -29,8 +29,8 @@ public class BlockchainService
             var selectedTransactions = GetNextTransactions(ref transactions);
             Console.WriteLine($"Mining Block #{++blockCount} with {selectedTransactions.Count} transactions...");
 
-            // // Create and mine candidate blocks
-            // var minedBlock = MineBlock(selectedTransactions);
+            // Create and mine candidate blocks
+            var minedBlock = MineBlock(selectedTransactions);
 
             transactions.RemoveRange(0, Math.Min(100, transactions.Count));
 
@@ -76,6 +76,21 @@ public class BlockchainService
         }
 
         return candidateBlocks;
+    }
+
+    private Block? MineBlock(List<Transaction> selectedTransactions)
+    {
+        var candidateBlocks = CreateCandidateBlocks(selectedTransactions);
+
+        foreach (var candidate in candidateBlocks)
+        {
+            if (candidate.Hash.StartsWith(new string('0', 3)))
+            {
+                return candidate;
+            }
+        }
+
+        return null;
     }
 
     private void UpdateBalances(List<User> users, List<Transaction> transactions)
