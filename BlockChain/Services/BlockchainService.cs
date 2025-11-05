@@ -65,6 +65,10 @@ public class BlockchainService
                 sender.Balance -= transaction.Amount;
                 receiver.Balance += transaction.Amount;
             }
+            else
+            {
+                Console.WriteLine($"Transaction failed: {transaction.Id} | Insufficient funds or invalid user.");
+            }
         }
     }
 
