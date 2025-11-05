@@ -33,6 +33,13 @@ public class BlockchainService
 
             var validTransactions = FilterValidTransactions(selectedTransactions, users);
 
+            if (validTransactions.Count == 0)
+            {
+                Console.WriteLine("No valid transactions for this block, removing invalid transactions and skipping...");
+                RemoveTransactionsFromPool(transactions, selectedTransactions);
+                continue;
+            }
+
             // Create candidate blocks
             var candidateBlocks = CreateCandidateBlocks(selectedTransactions, count: 5);
 
