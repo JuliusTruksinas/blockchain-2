@@ -31,6 +31,8 @@ public class BlockchainService
             var selectedTransactions = transactions.Take(100).ToList();
             Console.WriteLine($"Mining Block #{++blockCount} with {selectedTransactions.Count} transactions...");
 
+            var validTransactions = FilterValidTransactions(selectedTransactions, users);
+
             // Create candidate blocks
             var candidateBlocks = CreateCandidateBlocks(selectedTransactions, count: 5);
 
@@ -45,7 +47,7 @@ public class BlockchainService
                     UpdateBalances(users, selectedTransactions);
                     Console.WriteLine($"Block #{blockCount} mined! Hash: {minedBlock.Hash[..10]}...");
 
-                    RemoveMinedTransactions(transactions, selectedTransactions);
+                    RemoveTransactionsFromPool(transactions, selectedTransactions);
                     blockMined = true;
                 }
                 else
@@ -62,9 +64,31 @@ public class BlockchainService
         RenderBlockchainToHtml();
     }
 
-    private void RemoveTransactionsFromPool(List<Transaction> selectedTransactions, List<Transaction> allTransactions)
+    private List<Transaction> FilterValidTransactions(List<Transaction> transactions, List<User> users)
     {
-        foreach (var tx in selectedTransactions)
+        var validTransactions = new List<Transaction>();
+
+        foreach (var tx in transactions)
+        {
+            var sender = users.FirstOrDefault(u => u.PublicKey == tx.Sender);
+            var receiver = users.FirstOrDefault(u => u.PublicKey == tx.Receiver);
+
+            if (sender != null && receiver != null && sender.Balance >= tx.Amount)
+            {
+                validTransactions.Add(tx);
+            }
+            else
+            {
+                Console.WriteLine($"Invalid transaction: {tx.Id} | Insufficient funds or invalid user.");
+            }
+        }
+
+        return validTransactions;
+    }
+
+    private void RemoveTransactionsFromPool(List<Transaction> allTransactions, List<Transaction> transactionsToRemove)
+    {
+        foreach (var tx in transactionsToRemove)
         {
             allTransactions.RemoveAll(t => t.Id == tx.Id);
         }
