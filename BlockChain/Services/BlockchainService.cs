@@ -24,10 +24,10 @@ public class BlockchainService
         var transactions = _dataGenerator.GenerateTransactions(users, 10000);
 
         int blockCount = 0;
-        int maxAttempts = 5;
 
         while (transactions.Count != 0)
         {
+            int maxAttempts = 5;
             var selectedTransactions = transactions.Take(100).ToList();
             Console.WriteLine($"Mining Block #{++blockCount} with {selectedTransactions.Count} transactions...");
 
@@ -41,7 +41,7 @@ public class BlockchainService
             }
 
             // Create candidate blocks
-            var candidateBlocks = CreateCandidateBlocks(selectedTransactions, count: 5);
+            var candidateBlocks = CreateCandidateBlocks(validTransactions, count: 5);
 
             bool blockMined = false;
             while (!blockMined)
