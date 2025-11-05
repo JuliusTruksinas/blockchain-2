@@ -29,10 +29,12 @@ public class BlockchainService
             var selectedTransactions = GetNextTransactions(ref transactions);
             Console.WriteLine($"Mining Block #{++blockCount} with {selectedTransactions.Count} transactions...");
 
-            // Create and mine candidate blocks
-            var minedBlock = MineBlock(selectedTransactions);
+            // Create candidate blocks
+            var candidateBlocks = CreateCandidateBlocks(selectedTransactions, count: 5);
 
-            // If a block is mined, add it to the blockchain
+            // Try to mine the blocks with multiple attempts
+            Block? minedBlock = MineBlocks(candidateBlocks);
+
             if (minedBlock != null)
             {
                 _blockchain.AddBlock(minedBlock);
@@ -58,32 +60,33 @@ public class BlockchainService
         return selectedTransactions;
     }
 
-    private List<Block> CreateCandidateBlocks(List<Transaction> selectedTransactions)
+    private List<Block> CreateCandidateBlocks(List<Transaction> selectedTransactions, int count, int difficulty = 3)
     {
         var candidateBlocks = new List<Block>();
 
-        for (int i = 0; i < 5; i++)  // Try 5 candidate blocks
+        for (int i = 0; i < count; i++)
         {
-            var candidateBlock = new Block(selectedTransactions, _blockchain.GetLatestHash(), 3, _hasher);
+            var candidateBlock = new Block(selectedTransactions, _blockchain.GetLatestHash(), difficulty, _hasher);
             candidateBlocks.Add(candidateBlock);
         }
 
         return candidateBlocks;
     }
 
-    private Block? MineBlock(List<Transaction> selectedTransactions)
+    private Block? MineBlocks(List<Block> candidateBlocks, int maxAttempts = 5)
     {
-        var candidateBlocks = CreateCandidateBlocks(selectedTransactions);
+        Block? minedBlock = null;
 
         foreach (var candidate in candidateBlocks)
         {
-            if (candidate.Hash.StartsWith(new string('0', 3)))
+            if (candidate.TryMineBlock(_hasher, maxAttempts))
             {
-                return candidate;
+                minedBlock = candidate;
+                break;
             }
         }
 
-        return null;
+        return minedBlock;
     }
 
     private static void UpdateBalances(List<User> users, List<Transaction> transactions)
