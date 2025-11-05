@@ -26,7 +26,7 @@ public class BlockchainService
         int blockCount = 0;
         while (transactions.Count != 0)
         {
-            var selectedTransactions = GetNextTransactions(ref transactions);
+            var selectedTransactions = transactions.Take(100).ToList();
             Console.WriteLine($"Mining Block #{++blockCount} with {selectedTransactions.Count} transactions...");
 
             // Create candidate blocks
@@ -35,11 +35,12 @@ public class BlockchainService
             // Try to mine the blocks with multiple attempts
             Block? minedBlock = MineBlocks(candidateBlocks);
 
-            if (minedBlock != null)
+            if (minedBlock is not null)
             {
                 _blockchain.AddBlock(minedBlock);
                 UpdateBalances(users, selectedTransactions);
                 Console.WriteLine($"Block #{blockCount} mined! Hash: {minedBlock.Hash[..10]}...");
+                RemoveMinedTransactions(transactions, selectedTransactions);
             }
             else
             {
@@ -53,11 +54,12 @@ public class BlockchainService
         RenderBlockchainToHtml();
     }
 
-    private List<Transaction> GetNextTransactions(ref List<Transaction> transactions)
+    private static void RemoveMinedTransactions(List<Transaction> transactions, List<Transaction> selectedTransactions)
     {
-        var selectedTransactions = transactions.Take(100).ToList();
-        transactions.RemoveRange(0, Math.Min(100, transactions.Count));
-        return selectedTransactions;
+        foreach (var transaction in selectedTransactions)
+        {
+            transactions.Remove(transaction);
+        }
     }
 
     private List<Block> CreateCandidateBlocks(List<Transaction> selectedTransactions, int count, int difficulty = 3)
