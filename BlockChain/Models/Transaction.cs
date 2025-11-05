@@ -14,7 +14,7 @@ public class Transaction
         Sender = sender;
         Receiver = receiver;
         Amount = amount;
-        Id = hasher.Hash($"{sender}{receiver}{amount}{Guid.NewGuid()}");
+        Id = hasher.Hash($"{sender}{receiver}{amount}");
     }
 
     public override string ToString()
