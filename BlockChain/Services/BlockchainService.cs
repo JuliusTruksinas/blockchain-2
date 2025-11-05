@@ -24,6 +24,8 @@ public class BlockchainService
         var transactions = _dataGenerator.GenerateTransactions(users, 10000);
 
         int blockCount = 0;
+        int maxAttempts = 5;
+
         while (transactions.Count != 0)
         {
             var selectedTransactions = transactions.Take(100).ToList();
@@ -32,19 +34,25 @@ public class BlockchainService
             // Create candidate blocks
             var candidateBlocks = CreateCandidateBlocks(selectedTransactions, count: 5);
 
-            // Try to mine the blocks with multiple attempts
-            Block? minedBlock = MineBlocks(candidateBlocks);
+            bool blockMined = false;
+            while (!blockMined)
+            {
+                Block? minedBlock = MineBlocks(candidateBlocks, maxAttempts);
 
-            if (minedBlock is not null)
-            {
-                _blockchain.AddBlock(minedBlock);
-                UpdateBalances(users, selectedTransactions);
-                Console.WriteLine($"Block #{blockCount} mined! Hash: {minedBlock.Hash[..10]}...");
-                RemoveMinedTransactions(transactions, selectedTransactions);
-            }
-            else
-            {
-                Console.WriteLine($"No block mined after 5 attempts. Retrying...");
+                if (minedBlock != null)
+                {
+                    _blockchain.AddBlock(minedBlock);
+                    UpdateBalances(users, selectedTransactions);
+                    Console.WriteLine($"Block #{blockCount} mined! Hash: {minedBlock.Hash[..10]}...");
+
+                    RemoveMinedTransactions(transactions, selectedTransactions);
+                    blockMined = true;
+                }
+                else
+                {
+                    Console.WriteLine($"No block mined after {maxAttempts} attempts. Increasing attempts and retrying...");
+                    maxAttempts *= 2;
+                }
             }
         }
 
