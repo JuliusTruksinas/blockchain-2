@@ -86,7 +86,7 @@ public class BlockchainService
         return null;
     }
 
-    private void UpdateBalances(List<User> users, List<Transaction> transactions)
+    private static void UpdateBalances(List<User> users, List<Transaction> transactions)
     {
         foreach (var transaction in transactions)
         {
@@ -120,7 +120,7 @@ public class BlockchainService
         OpenFileInBrowser(renderResult.Value);
     }
 
-    private void OpenFileInBrowser(string filePath)
+    private static void OpenFileInBrowser(string filePath)
     {
         try
         {
