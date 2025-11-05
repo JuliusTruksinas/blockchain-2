@@ -80,13 +80,13 @@ public class BlockchainService
             var sender = users.FirstOrDefault(u => u.PublicKey == tx.Sender);
             var receiver = users.FirstOrDefault(u => u.PublicKey == tx.Receiver);
 
-            if (sender != null && receiver != null && sender.Balance >= tx.Amount)
+            if (sender != null && receiver != null && ValidateTransactionId(tx, _hasher) && sender.Balance >= tx.Amount)
             {
                 validTransactions.Add(tx);
             }
             else
             {
-                Console.WriteLine($"Invalid transaction: {tx.Id} | Insufficient funds or invalid user.");
+                Console.WriteLine($"Invalid transaction: {tx.Id} | Insufficient funds or invalid transaction id.");
             }
         }
 
@@ -137,17 +137,19 @@ public class BlockchainService
             var sender = users.FirstOrDefault(u => u.PublicKey == transaction.Sender);
             var receiver = users.FirstOrDefault(u => u.PublicKey == transaction.Receiver);
 
-            if (sender != null && receiver != null && sender.Balance >= transaction.Amount)
-            {
-                sender.Balance -= transaction.Amount;
-                receiver.Balance += transaction.Amount;
-            }
-            else
-            {
-                Console.WriteLine($"Transaction failed: {transaction.Id} | Insufficient funds or invalid user.");
-            }
+            sender!.Balance -= transaction.Amount;
+            receiver!.Balance += transaction.Amount;
+
         }
     }
+
+    private static bool ValidateTransactionId(Transaction transaction, IHasher hasher)
+    {
+        string recalculatedTxId = hasher.Hash($"{transaction.Sender}{transaction.Receiver}{transaction.Amount}");
+
+        return transaction.Id == recalculatedTxId;
+    }
+
     private void RenderBlockchainToHtml()
     {
         string xsltTemplatePath = Path.Combine(Directory.GetCurrentDirectory(), "Templates", "blockchain.xslt");
