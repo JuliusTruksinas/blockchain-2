@@ -19,16 +19,19 @@ public class BlockchainService
 
     public void Run()
     {
+        // Generate users and transactions
         var users = _dataGenerator.GenerateUsers(1000);
         var transactions = _dataGenerator.GenerateTransactions(users, 10000);
 
         int blockCount = 0;
-        while (transactions.Any())
+        while (transactions.Count != 0)
         {
-            var selectedTransactions = transactions.Take(100).ToList();
+            var selectedTransactions = GetNextTransactions(ref transactions);
+            Console.WriteLine($"Mining Block #{++blockCount} with {selectedTransactions.Count} transactions...");
+
+
             transactions.RemoveRange(0, Math.Min(100, transactions.Count));
 
-            Console.WriteLine($"Mining Block #{++blockCount} with {selectedTransactions.Count} transactions...");
             var block = new Block(selectedTransactions, _blockchain.GetLatestHash(), 3, _hasher);
             _blockchain.AddBlock(block);
 
@@ -51,6 +54,13 @@ public class BlockchainService
 
         Console.WriteLine($"Rendered blockchain: {renderResult.Value}");
         OpenFileInBrowser(renderResult.Value);
+    }
+
+    private List<Transaction> GetNextTransactions(ref List<Transaction> transactions)
+    {
+        var selectedTransactions = transactions.Take(100).ToList();
+        transactions.RemoveRange(0, Math.Min(100, transactions.Count));
+        return selectedTransactions;
     }
 
     private void UpdateBalances(List<User> users, List<Transaction> transactions)
